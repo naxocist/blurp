@@ -1,5 +1,6 @@
 import asyncio
 from math import floor
+import numbers
 from typing import cast
 
 import discord
@@ -7,8 +8,8 @@ from discord import ApplicationContext, Bot, Color, Embed, Member, Option
 from discord.ext import commands
 
 from credentials import guild_ids
-from utils.customs.states import minigame_objects, players_games
-from utils.customs.whatnum.comps import BinarySearch, fail_embed
+from utils.customs.states import Answer, minigame_objects, players_games
+from utils.customs.whatnum.comps import BinarySearch
 
 
 class WhatNum(commands.Cog):
@@ -33,8 +34,9 @@ class WhatNum(commands.Cog):
         member = ctx.author
         if not isinstance(member, Member):
             return
-        low = cast(str, low)
-        high = cast(str, high)
+
+        low = cast(int, low)
+        high = cast(int, high)
 
         if member in players_games:
             await ctx.respond(
@@ -63,14 +65,14 @@ class WhatNum(commands.Cog):
         await ctx.send(f"You have {timer} seconds. Good luck!")
 
         while timer > 0:
-            if bs_obj.success:
+            if bs_obj.status != Answer.NOT_ANSWERED:
                 break
 
             await asyncio.sleep(1)
             timer -= 1
 
-        if timer == 0 or bs_obj.success == 1:
-            await ctx.respond(embed=fail_embed(str(bs_obj.target)))
+        if timer == 0 or bs_obj.status == Answer.ANSWERED_WRONG:
+            await ctx.respond(embed=BinarySearch.fail_embed(str(bs_obj.target)))
 
         minigame_objects.remove(bs_obj)
         players_games.pop(member, None)

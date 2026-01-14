@@ -1,8 +1,10 @@
 from dataclasses import dataclass
+from math import floor, log2
 from random import randint
-from math import log2, floor
 
-from discord import Embed, Color
+from discord import Color, Embed
+
+from utils.customs.states import Answer
 
 
 @dataclass(init=False)
@@ -16,21 +18,21 @@ class BinarySearch:
             n != 2^k: worse case = floor(log2(n)) + 1 = k + 1
     """
 
-    def __init__(self, low, high):
+    def __init__(self, low: int, high: int):
         self.low, self.high = low, high
         self.target = randint(low, high)
         self.expected_guess_cnt = floor(log2(high - low + 1)) + 1
         self.guess_cnt = 0
 
-        self.success = 0
+        self.status = Answer.NOT_ANSWERED
 
     def terminate(self, success: bool):
-        self.success = 2 if success else 1
+        self.status = Answer.ANSWERED_CORRECT if success else Answer.ANSWERED_WRONG
 
-
-def fail_embed(target: str) -> Embed:
-    return Embed(
-        title="Failed",
-        description=f"The number was **{target}**\nYou're not being optimal... You should've guessed it.\nMaybe look into [binary search](https://en.wikipedia.org/wiki/Binary_search)",
-        color=Color.red(),
-    )
+    @staticmethod
+    def fail_embed(target: str) -> Embed:
+        return Embed(
+            title="Failed",
+            description=f"The number was **{target}**\nYou're not being optimal... You should've guessed it.\nMaybe look into [binary search](https://en.wikipedia.org/wiki/Binary_search)",
+            color=Color.red(),
+        )

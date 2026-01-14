@@ -14,7 +14,7 @@ class Ship(commands.Cog):
     async def init(self, ctx: ApplicationContext):
         await ctx.defer()
 
-        ctx.respond("Underconstruction")
+        await ctx.respond("end function")
 
 
 def setup(bot: Bot):

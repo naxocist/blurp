@@ -1,18 +1,12 @@
 import asyncio
-from enum import Enum
 from typing import List, Optional
 
 import discord
 from discord import Color, Embed
 
+from utils.customs.states import Answer
 from utils.mal_model.models import AnimeFull
 from utils.tools import blur_image_from_url, make_synopsis_clue
-
-
-class ClueAnswer(Enum):
-    NOT_ANSWERED = 0
-    ANSWERED_WRONG = 1
-    ANSWERED_CORRECT = 2
 
 
 class ClueClass:
@@ -25,7 +19,7 @@ class ClueClass:
         self.blurred_image_file: Optional[discord.File] = None
 
         self.timer = self.REVEAL_DELAYS[0]
-        self.status = ClueAnswer.NOT_ANSWERED
+        self.status = Answer.NOT_ANSWERED
         self.answered_event = asyncio.Event()
 
     @property

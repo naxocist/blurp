@@ -8,8 +8,8 @@ from discord.ext import commands
 from credentials import guild_ids
 from utils.apis.jikanv4 import get_anime_by_id
 from utils.apis.MAL import get_user_anime_list
-from utils.customs.aniclues.comps import ClueAnswer, ClueClass
-from utils.customs.states import minigame_objects, players_games
+from utils.customs.aniclues.comps import ClueClass
+from utils.customs.states import Answer, minigame_objects, players_games
 from utils.template.embed import make_timer_embed
 from utils.template.response import sendError
 
@@ -97,7 +97,7 @@ class AniClues(commands.Cog):
             async def next_clue_and_new_timer():
                 nonlocal timer, timer_msg
                 clue_obj.advance_clue()
-                clue_obj.status = ClueAnswer.NOT_ANSWERED
+                clue_obj.status = Answer.NOT_ANSWERED
 
                 crr_clue_embed = clue_obj.current_embed
                 if clue_obj.current_clue_index == 4:
@@ -123,10 +123,7 @@ class AniClues(commands.Cog):
                 clue_obj.answered_event.clear()
 
                 # correct answer or out of clues, terminate
-                if (
-                    clue_obj.status == ClueAnswer.ANSWERED_CORRECT
-                    or clue_obj.is_last_clue
-                ):
+                if clue_obj.status == Answer.ANSWERED_CORRECT or clue_obj.is_last_clue:
                     await timer_msg.delete()
                     break
 
@@ -201,7 +198,7 @@ class AniClues(commands.Cog):
                     color=Color.green(),
                 ),
             )
-            clues_obj.status = ClueAnswer.ANSWERED_CORRECT
+            clues_obj.status = Answer.ANSWERED_CORRECT
         else:
             answered_anime = await get_anime_by_id(anime_id)
             if not answered_anime:
@@ -211,7 +208,7 @@ class AniClues(commands.Cog):
             await ctx.respond(
                 f"Nah, [{answered_anime.title}]({answered_anime.url}) is not quite right. Revealing next clue...",
             )
-            clues_obj.status = ClueAnswer.ANSWERED_WRONG
+            clues_obj.status = Answer.ANSWERED_WRONG
 
         clues_obj.answered_event.set()  # trigger answered event
 
