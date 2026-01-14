@@ -7,8 +7,8 @@ from credentials import TYPHOON_API_KEY
 client = OpenAI(api_key=TYPHOON_API_KEY, base_url="https://api.opentyphoon.ai/v1")
 
 
-def inference(system_prompt: str, input_prompt: str) -> Optional[str]:
-    model = "typhoon-v2-70b-instruct"
+def typhoon_inference(system_prompt: str, input_prompt: str) -> Optional[str]:
+    model = "typhoon-v2.5-30b-a3b-instruct"
     try:
         response = client.chat.completions.create(
             model=model,

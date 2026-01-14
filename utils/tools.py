@@ -1,6 +1,6 @@
 import asyncio
 from io import BytesIO
-from typing import Callable
+from typing import Callable, Optional
 
 import cv2
 import numpy as np
@@ -8,8 +8,8 @@ import requests
 from discord import ApplicationContext
 from PIL import Image
 
+from utils.apis.google import google_inference
 from utils.apis.jikanv4 import get_anime_characters
-from utils.apis.typhoon import inference
 from utils.mal_model.models import AnimeFull
 from utils.template.embed import make_timer_embed
 
@@ -42,7 +42,7 @@ async def make_synopsis_clue(anime: AnimeFull) -> str:
     """
 
     system_prompt = "You are an anime expert that provides spoiler-free, name-free engaging plot summaries."
-    clue = inference(system_prompt, input_prompt)
+    clue = google_inference(system_prompt, input_prompt)
     return clue or f"A story about: {anime.synopsis[:100]}..."
 
 
@@ -75,9 +75,9 @@ async def count_down_timer(
             return
 
 
-def blur_image_from_url(url: str, blur_strength: int = 25) -> BytesIO:
+def blur_image_from_url(url: str, blur_strength: int = 25) -> Optional[BytesIO]:
     """
-    Downloads an image from a URL, applies Gaussian blur, and returns it as a BytesIO buffer.
+    get image from URL -> guasssian blur -> return as BytesIO buffer
 
     Args:
         url (str): Image URL.
@@ -86,25 +86,30 @@ def blur_image_from_url(url: str, blur_strength: int = 25) -> BytesIO:
     Returns:
         BytesIO: Blurred image in PNG format.
     """
-    # Download and open the image
-    response = requests.get(url)
-    response.raise_for_status()  # Raise error if download fails
-    image = Image.open(BytesIO(response.content)).convert("RGB")
 
-    # Convert to OpenCV format
-    img_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    try:
 
-    # Ensure blur kernel is odd
-    ksize = max(1, blur_strength | 1)
+        # Download and open the image
+        response = requests.get(url)
+        response.raise_for_status()  # Raise error if download fails
+        image = Image.open(BytesIO(response.content)).convert("RGB")
 
-    # Apply Gaussian blur
-    blurred_cv = cv2.GaussianBlur(img_cv, (ksize, ksize), 0)
+        # Convert to OpenCV format
+        img_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
-    # Convert back to PIL Image
-    result_image = Image.fromarray(cv2.cvtColor(blurred_cv, cv2.COLOR_BGR2RGB))
+        # Ensure blur kernel is odd
+        ksize = max(1, blur_strength | 1)
 
-    # Save to BytesIO buffer
-    buffer = BytesIO()
-    result_image.save(buffer, format="PNG")
-    buffer.seek(0)
-    return buffer
+        # Apply Gaussian blur
+        blurred_cv = cv2.GaussianBlur(img_cv, (ksize, ksize), 0)
+
+        # Convert back to PIL Image
+        result_image = Image.fromarray(cv2.cvtColor(blurred_cv, cv2.COLOR_BGR2RGB))
+
+        # Save to BytesIO buffer
+        buffer = BytesIO()
+        result_image.save(buffer, format="PNG")
+        buffer.seek(0)
+        return buffer
+    except:
+        return None
