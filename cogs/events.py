@@ -1,6 +1,11 @@
 import discord
-from discord import (ApplicationCommandError, ApplicationContext, Bot, Member,
-                     RawReactionActionEvent)
+from discord import (
+    ApplicationCommandError,
+    ApplicationContext,
+    Bot,
+    Member,
+    RawReactionActionEvent,
+)
 from discord.ext import commands
 
 

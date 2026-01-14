@@ -1,4 +1,3 @@
-import lemminflect
 from nekosbest import Client, Result
 
 client = Client()

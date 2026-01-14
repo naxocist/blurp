@@ -8,8 +8,12 @@ from dotmap import DotMap
 from credentials import guild_ids
 from utils.apis.jikanv4 import get_anime_by_id
 from utils.customs.anicycle.comps import CycleClass
-from utils.customs.anicycle.logic import (game_phase, init_phase, pick_phase,
-                                          random_phase)
+from utils.customs.anicycle.logic import (
+    game_phase,
+    init_phase,
+    pick_phase,
+    random_phase,
+)
 from utils.customs.states import players_games  # shared in-memory game state
 
 
@@ -72,12 +76,14 @@ class AniCycle(commands.Cog):
             await ctx.respond("Invalid anime id was provided.", ephemeral=True)
             return
 
-        result = DotMap(result)
-        title, url, mal_id, image_url = (
-            result.data.title,
-            result.data.url,
-            result.data.mal_id,
-            result.data.images.jpg.image_url,
+        image_url = ""
+        if result.images and result.images.jpg:
+            image_url = result.images.jpg.image_url or ""
+
+        title, url, mal_id = (
+            result.title,
+            result.url,
+            result.mal_id,
         )
 
         # get member object of assigned player
@@ -131,12 +137,14 @@ class AniCycle(commands.Cog):
             await ctx.respond("Invalid anime id was provided.", ephemeral=True)
             return
 
-        result = DotMap(result)
-        title, url, mal_id, image_url = (
-            result.data.title,
-            result.data.url,
-            result.data.mal_id,
-            result.data.images.jpg.image_url,
+        image_url = ""
+        if result.images and result.images.jpg:
+            image_url = result.images.jpg.image_url or ""
+
+        title, url, mal_id = (
+            result.title,
+            result.url,
+            result.mal_id,
         )
 
         # retrieve player's assigned anime
@@ -166,5 +174,5 @@ class AniCycle(commands.Cog):
         await msg.delete(delay=5)
 
 
-def setup(bot):
+def setup(bot: Bot):
     bot.add_cog(AniCycle(bot))

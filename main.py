@@ -21,7 +21,7 @@ if __name__ == "__main__":
         exit()
 
     print("Loading cogs...")
-    for cog in ["anime", "events", "anicycle", "aniclues", "whatnum"]:
+    for cog in ["anime", "events", "anicycle", "aniclues", "whatnum", "ship"]:
         try:
             _ = bot.load_extension(f"cogs.{cog}")
             print(f"Loaded {cog}.py successfully.")

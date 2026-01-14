@@ -6,8 +6,7 @@ import discord
 from typing import List
 import asyncio
 
-from utils.apis.typhoon import get_synopsis_clue
-from utils.customs.tools import blur_image_from_url
+from utils.tools import blur_image_from_url, make_synopsis_clue
 
 
 class CluesClass:
@@ -40,7 +39,7 @@ class CluesClass:
         score = f"`{anime.score}`/10" or "`N/A`"
         ranked = f"#{anime.rank}" or "N/A"
 
-        synopsis_clue = await get_synopsis_clue(self.anime)
+        synopsis_clue = await make_synopsis_clue(self.anime)
         image_url = self.anime.images.jpg.image_url
         file_buffer = blur_image_from_url(image_url, 50)
         self.file = discord.File(fp=file_buffer, filename="blurred.png")

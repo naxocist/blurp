@@ -5,10 +5,8 @@ from discord import ApplicationContext, Color, Embed, Member
 from nekosbest import Result
 
 from utils.apis.nekosbest import get_img
-from utils.customs.anicycle.comps import (CycleClass, InviteView, PickView,
-                                          TurnView)
-from utils.customs.tools import \
-    count_down_timer  # discord embed countdown timer
+from utils.customs.anicycle.comps import CycleClass, InviteView, PickView, TurnView
+from utils.tools import count_down_timer
 
 
 async def init_phase(ctx: ApplicationContext):

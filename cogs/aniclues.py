@@ -11,7 +11,7 @@ from utils.apis.jikanv4 import get_anime_by_id
 from utils.apis.MAL import get_user_anime_list
 from utils.customs.aniclues.comps import CluesClass
 from utils.customs.states import minigame_objects, players_games
-from utils.customs.tools import get_timer_embed
+from utils.template.embed import make_timer_embed
 
 
 class AniClues(commands.Cog):
@@ -97,7 +97,7 @@ class AniClues(commands.Cog):
         await ctx.send(embed=crr_clue_embed)
         timer = clue_obj.timer
         timer_msg = await ctx.send(
-            embed=get_timer_embed("Time until next clue: ", timer)
+            embed=make_timer_embed("Time until next clue: ", timer)
         )
 
         while True:
@@ -120,7 +120,7 @@ class AniClues(commands.Cog):
                 await timer_msg.delete()
                 timer = clue_obj.timer
                 timer_msg = await ctx.send(
-                    embed=get_timer_embed(
+                    embed=make_timer_embed(
                         f"{'Time until solution: ' if clue_obj.is_last_clue() else 'Time until next clue: '}",
                         timer,
                     )
@@ -150,7 +150,7 @@ class AniClues(commands.Cog):
 
             if timer % 5 == 0 or timer <= 5:
                 await timer_msg.edit(
-                    embed=get_timer_embed(
+                    embed=make_timer_embed(
                         f"{'Time until solution: ' if clue_obj.is_last_clue() else 'Time until next clue: '}",
                         timer,
                     ),
@@ -215,5 +215,5 @@ class AniClues(commands.Cog):
         clues_obj.answered_event.set()  # trigger answered flag
 
 
-def setup(bot):
+def setup(bot: Bot):
     bot.add_cog(AniClues(bot))

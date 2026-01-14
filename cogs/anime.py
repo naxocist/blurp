@@ -1,16 +1,23 @@
 from typing import cast
 
 import discord
-from discord import (ApplicationContext, Bot, Color, Embed, Member, Message,
-                     Option)
+from discord import (
+    ApplicationContext,
+    Bot,
+    Color,
+    Embed,
+    Member,
+    Option,
+    WebhookMessage,
+)
 from discord.ext import commands
 from nekosbest import Result
 
 from credentials import guild_ids
 from utils.apis.jikanv4 import get_random_anime
-from utils.apis.nekosbest import (get_img, get_phrase, other_actions,
-                                  self_actions)
-from utils.customs.tools import make_anime_embed
+from utils.apis.nekosbest import get_img, get_phrase, other_actions, self_actions
+from utils.template.embed import make_anime_embed
+from utils.template.response import sendError
 
 
 class Anime(commands.Cog):
@@ -23,10 +30,16 @@ class Anime(commands.Cog):
         await ctx.defer()
 
         anime = await get_random_anime()
-        embed = make_anime_embed(anime)
-        response = await ctx.respond(embed=embed)
-        response = cast(Message, response)
-        await discord.Message.add_reaction(response, "📬")
+        if not anime:
+            await sendError(ctx, "Failed to get an anime somehow😭")
+            return
+
+        res = await ctx.respond(embed=make_anime_embed(anime))
+        if not isinstance(res, WebhookMessage):
+            await sendError(ctx, "Internal Error... Try again later.")
+            return
+
+        await res.add_reaction("📬")
 
     # expression emotions through gifs
     @commands.slash_command(guild_ids=guild_ids, description="Express your emotions")

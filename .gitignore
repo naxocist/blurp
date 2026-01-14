@@ -3,6 +3,7 @@
 pyvenv.cfg
 .prettierrc
 discord.log
+session*.md
 
 __pycache__
 Include
