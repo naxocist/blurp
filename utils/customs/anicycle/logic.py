@@ -1,11 +1,12 @@
 import asyncio
 from typing import cast
 
-from discord import ApplicationContext, Color, Embed, Member
+from discord import ApplicationContext, Color, Embed, Member, Message
 from nekosbest import Result
 
 from utils.apis.nekosbest import get_img
 from utils.customs.anicycle.comps import CycleClass, InviteView, PickView, TurnView
+from utils.customs.states import Answer
 from utils.tools import count_down_timer
 
 
@@ -34,12 +35,11 @@ async def init_phase(ctx: ApplicationContext):
                 color=Color.red(),
             ),
         )
-        cycle_obj.clean_up()
         return None
 
     if invite_view.terminator is None:
-        await ctx.respond("[Error] No terminator... weird.")
-        return
+        print("[Error] No terminator... weird.")
+        raise Exception
 
     if invite_view.is_terminated:
         await ctx.send(
@@ -53,7 +53,7 @@ async def init_phase(ctx: ApplicationContext):
     return cycle_obj
 
 
-async def random_phase(ctx: ApplicationContext, cycle_obj):
+async def random_phase(ctx: ApplicationContext, cycle_obj: CycleClass):
     # assign every player another player
     cycle_obj.random_targets()
 
@@ -91,7 +91,12 @@ async def random_phase(ctx: ApplicationContext, cycle_obj):
     return pick_msg, pick_view
 
 
-async def pick_phase(ctx: ApplicationContext, cycle_obj, pick_msg, pick_view):
+async def pick_phase(
+    ctx: ApplicationContext,
+    cycle_obj: CycleClass,
+    pick_msg: Message,
+    pick_view: PickView,
+):
     # assigned pick asyncio.Event to every player (listen for /cycle pick)
     for player in cycle_obj.players:
         cycle_obj.players_pick_event[player] = asyncio.Event()
@@ -125,7 +130,7 @@ async def pick_phase(ctx: ApplicationContext, cycle_obj, pick_msg, pick_view):
     for task in pending:
         task.cancel()
 
-    await asyncio.gather(*pending, return_exceptions=True)
+    # await asyncio.gather(pending, return_exceptions=True)
 
     if terminate_task in done:
         # Termination happened first: cancel all player tasks
@@ -133,13 +138,16 @@ async def pick_phase(ctx: ApplicationContext, cycle_obj, pick_msg, pick_view):
 
         pick_view.disable_all_items()
         await pick_msg.edit(view=pick_view)
+
+        if not pick_view.terminator:
+            raise Exception
+
         await ctx.send(
             embed=Embed(
                 description=f"**{pick_view.terminator.mention} terminated the game...**",
                 color=Color.red(),
             )
         )
-        cycle_obj.clean_up()
         return
     else:
         terminate_task.cancel()
@@ -149,7 +157,7 @@ async def pick_phase(ctx: ApplicationContext, cycle_obj, pick_msg, pick_view):
     await pick_msg.delete()
 
 
-async def game_phase(ctx: ApplicationContext, cycle_obj):
+async def game_phase(ctx: ApplicationContext, cycle_obj: CycleClass):
     # DM everyone about assigned anime info
     for player in cycle_obj.players:
         info = ""
@@ -232,7 +240,7 @@ async def game_phase(ctx: ApplicationContext, cycle_obj):
             if answered_task in done:
                 cycle_obj.answered_event.clear()
                 # answered correctedly, so update leaderboard
-                if cycle_obj.just_answered == 1:
+                if cycle_obj.status == Answer.ANSWERED_CORRECT:
                     await leaderboard.edit(embed=cycle_obj.leaderboard())
 
                 # skip turn if answer
@@ -252,10 +260,8 @@ async def game_phase(ctx: ApplicationContext, cycle_obj):
                     color=Color.red(),
                 )
             )
-            cycle_obj.clean_up()
             return
 
         cycle_obj.advance_player()
 
     await turn_msg.delete()
-    cycle_obj.clean_up()

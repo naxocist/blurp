@@ -1,3 +1,4 @@
+from itertools import cycle
 from typing import cast
 
 import discord
@@ -14,7 +15,8 @@ from utils.customs.anicycle.logic import (
     pick_phase,
     random_phase,
 )
-from utils.customs.states import players_games  # shared in-memory game state
+from utils.customs.states import Answer, players_games
+from utils.mal_model.models import AnimeFull  # shared in-memory game state
 
 
 class AniCycle(commands.Cog):
@@ -29,25 +31,31 @@ class AniCycle(commands.Cog):
     async def init(self, ctx: ApplicationContext):
         await ctx.defer()
 
-        cycle_obj = await init_phase(ctx)
+        cycle_obj = None
+        try:
+            cycle_obj = await init_phase(ctx)
+            if not isinstance(cycle_obj, CycleClass):
+                return 
 
-        if not cycle_obj:
-            return
+            # DEMO data
+            # cycle_obj.add_player(ctx.author)
+            # cycle_obj.add_player(self.bot.user)
+            # cycle_obj.player_animes[ctx.author] = DotMap(
+            #     dict(
+            #         title="Aharen-san wa Hakarenai Season 2",
+            #         url="https://myanimelist.net/anime/59466/Aharen-san_wa_Hakarenai_Season_2",
+            #         mal_id=59466,
+            #     )
+            # )
 
-        # DEMO data
-        # cycle_obj.add_player(ctx.author)
-        # cycle_obj.add_player(self.bot.user)
-        # cycle_obj.player_animes[ctx.author] = DotMap(
-        #     dict(
-        #         title="Aharen-san wa Hakarenai Season 2",
-        #         url="https://myanimelist.net/anime/59466/Aharen-san_wa_Hakarenai_Season_2",
-        #         mal_id=59466,
-        #     )
-        # )
-
-        pick_msg, pick_view = await random_phase(ctx, cycle_obj)
-        await pick_phase(ctx, cycle_obj, pick_msg, pick_view)
-        await game_phase(ctx, cycle_obj)
+            pick_msg, pick_view = await random_phase(ctx, cycle_obj)
+            await pick_phase(ctx, cycle_obj, pick_msg, pick_view)
+            await game_phase(ctx, cycle_obj)
+        except:
+            await ctx.send("An Error occured..., Try again later.")
+        finally:
+            if cycle_obj is not None:
+                cycle_obj.clean()
 
     @cycle.command(description="Pick an anime for your assigned player")
     async def pick(self, ctx: ApplicationContext, anime_id: int):
@@ -148,20 +156,20 @@ class AniCycle(commands.Cog):
         )
 
         # retrieve player's assigned anime
-        target: DotMap = cycle_obj.player_animes[member]
+        target: AnimeFull = cycle_obj.player_animes[member]
 
         correct = target.mal_id == mal_id
         guessed = f"{member.mention} guessed [{title}]({url})\n"
         embed = Embed(image=image_url)
 
         if correct:
-            cycle_obj.just_answered = 1
+            cycle_obj.status = Answer.ANSWERED_CORRECT
             guessed += "**Correct!** 🤓"
             embed.color = Color.brand_green()
             cycle_obj.add_done(member)
             cycle_obj.turn_done[member] = cycle_obj.round
         else:
-            cycle_obj.just_answered = 2
+            cycle_obj.status = Answer.ANSWERED_WRONG
             guessed += "**Not quite right... Try again!** 🥹"
             embed.color = Color.brand_red()
 

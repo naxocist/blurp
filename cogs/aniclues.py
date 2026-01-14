@@ -11,7 +11,6 @@ from utils.apis.MAL import get_user_anime_list
 from utils.customs.aniclues.comps import ClueClass
 from utils.customs.states import Answer, minigame_objects, players_games
 from utils.template.embed import make_timer_embed
-from utils.template.response import sendError
 
 
 class AniClues(commands.Cog):
@@ -55,10 +54,7 @@ class AniClues(commands.Cog):
 
         anime = await get_anime_by_id(anime_id)
         if not anime:
-            await sendError(
-                ctx,
-                "Failed to choose an anime for u🥲, Try again later or try another MAL username",
-            )
+            await ctx.send("Failed to choose an anime for u🥲, Try again later or try another MAL username")
             return
 
         clue_obj = ClueClass(anime)

@@ -5,9 +5,9 @@ from typing import List
 import discord
 from discord import Color, Embed, Interaction, Member
 from discord.ui import Button, View
-from dotmap import DotMap
 
-from ..states import minigame_objects, players_games
+from utils.customs.states import Answer, minigame_objects, players_games
+from utils.mal_model.models import AnimeFull
 
 
 class InviteView(View):
@@ -103,16 +103,14 @@ class CycleClass:
         self.players: List[Member] = []
         self.targets: dict[Member, Member] = {}
         self.given_by: dict[Member, Member] = {}
-        self.player_animes: dict[Member, DotMap] = {}
+        self.player_animes: dict[Member, AnimeFull] = {}
         self.player_count = 0
 
         self.players_pick_event: dict[Member, asyncio.Event] = {}
         self.players_picked: List[Member] = []
 
         self.turn_done: dict[Member, int] = {}
-        self.just_answered = (
-            0  # 0: not yet answered, 1: answered (wrong), 2: answered (right)
-        )
+        self.status = Answer.NOT_ANSWERED
         self.answered_event = asyncio.Event()
 
         self.active_player_index = 0
@@ -187,7 +185,7 @@ class CycleClass:
             color=Color.gold(),
         )
 
-    def clean_up(self):
+    def clean(self):
         for player in self.players:
             if player in players_games:
                 players_games.pop(player, None)
