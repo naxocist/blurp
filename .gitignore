@@ -13,3 +13,4 @@ logs
 sandbox
 
 .ruff_cache
+.doppler*

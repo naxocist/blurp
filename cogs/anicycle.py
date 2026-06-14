@@ -1,4 +1,3 @@
-from itertools import cycle
 from typing import cast
 
 import discord
@@ -35,7 +34,7 @@ class AniCycle(commands.Cog):
         try:
             cycle_obj = await init_phase(ctx)
             if not isinstance(cycle_obj, CycleClass):
-                return 
+                return
 
             # DEMO data
             # cycle_obj.add_player(ctx.author)

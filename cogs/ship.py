@@ -10,7 +10,7 @@ class Ship(commands.Cog):
 
     ship = SlashCommandGroup("ship", "shipping minigame", guild_ids=guild_ids)
 
-    @ship.command(guild_ids=guild_ids, description="Get a random anime")
+    @ship.command(guild_ids=guild_ids, description="Just ship 2 anime characters")
     async def init(self, ctx: ApplicationContext):
         await ctx.defer()
 
