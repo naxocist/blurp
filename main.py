@@ -1,30 +1,18 @@
-import discord
-
-from credentials import DISCORD_BOT_TOKEN
-from logging_config import setup_logging
+from blurp.logging_setup import setup_logging
 
 setup_logging()
 
+from blurp.bot import create_bot  # noqa: E402
+from blurp.config import settings  # noqa: E402
 
-intents = discord.Intents.default()
-intents.message_content = True
 
-bot = discord.Bot(
-    description="The versatile anime related discord bot", intents=intents
-)
+def main():
+    if not settings.discord_bot_token:
+        raise RuntimeError("DISCORD_BOT_TOKEN is required")
 
-bot.activity = discord.Activity(type=discord.ActivityType.watching, name="anime")
+    bot = create_bot()
+    bot.run(settings.discord_bot_token)
+
 
 if __name__ == "__main__":
-    if not DISCORD_BOT_TOKEN:
-        print("Discord TOKEN is required")
-        exit()
-
-    print("Loading cogs...")
-    for cog in ["anime", "events", "anicycle", "aniclues", "whatnum", "ship"]:
-        try:
-            _ = bot.load_extension(f"cogs.{cog}")
-            print(f"Loaded {cog}.py successfully.")
-        except Exception as e:
-            print(f"Failed to load {cog}.py: {e}")
-    bot.run(DISCORD_BOT_TOKEN)
+    main()
