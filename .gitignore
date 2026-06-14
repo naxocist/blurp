@@ -14,3 +14,5 @@ sandbox
 
 .ruff_cache
 .doppler*
+
+docs/
